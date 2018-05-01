@@ -85,7 +85,7 @@ class EightPuzzle:
             path.append(self)
             return self._parent._generate_solution_path(path)
 
-    def solve(self, h):
+    def solve(self, heur, algorithm):
         """Performs A* search for goal state.
         h(puzzle) - heuristic function, returns an integer
         """
@@ -110,7 +110,7 @@ class EightPuzzle:
                 # have we already seen this node?
                 index_open = index(move, openlist) 
                 index_closed = index(move, closedlist)
-                heurval = h(move)
+                heurval = heur(move)
                 fval = heurval + move._depth
 
                 if index_closed == -1 and index_open == -1:
@@ -131,7 +131,10 @@ class EightPuzzle:
                         openlist.append(move)
 
             closedlist.append(x)
-            openlist = sorted(openlist, key=lambda p: p._heurval + p._depth)
+			if algorithm is UCS:
+				openlist = sorted(openlist, key=lambda p: p.depth)
+			else:
+				openlist = sorted(openlist, key=lambda p: p._heurval + p._depth)
 
         # if finished state not found, return failure
         return [], 0
@@ -179,15 +182,17 @@ def main():
     p.shuffle(20)
     print p
 
-    path, count = p.solve(h_manhattan)
+    path, count = p.solve(h_manhattan, A*)
     path.reverse()
     for i in path: 
         print i
 
     print "Solved with A* search utilizing Manhattan distance hueuristic exploring ", count, "states"
+	path, count = p.solve(h_default, UCS)
 	print "Solved with UCS in", count, "moves"
+	path, count = p.solve(h_default, DFS)
 	print "Solved with DFS in", count, "moves"
-    path, count = p.solve(heur_default)
+    path, count = p.solve(h_default, BFS)
     print "Solved with BFS in", count, "moves"
 
 if __name__ == "__main__":
