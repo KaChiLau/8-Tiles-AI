@@ -16,7 +16,7 @@
             for col in range(3):
                 if self.adj_matrix[row][col] == value:
                     return row, col
-    
+
     def peek(self, row, col):
         """returns the value at the specified row and column"""
         return self.adj_matrix[row][col]

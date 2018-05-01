@@ -3,6 +3,7 @@
 import random
 import math
 
+
 _goal_state = [[1,2,3],
                [4,5,6],
                [7,8,0]]
@@ -131,13 +132,47 @@ class EightPuzzle:
                         openlist.append(move)
 
             closedlist.append(x)
-			if algorithm is UCS:
-				openlist = sorted(openlist, key=lambda p: p.depth)
-			else:
-				openlist = sorted(openlist, key=lambda p: p._heurval + p._depth)
+            if algorithm is 'UCS':
+                openlist = sorted(openlist, key=lambda p: p._depth)
+            else:
+                openlist = sorted(openlist, key=lambda p: p._heurval + p._depth)
 
         # if finished state not found, return failure
         return [], 0
+
+    def shuffle(self, step_count):
+        for i in range(step_count):
+            row, col = self.find(0)
+            free = self._get_legal_moves()
+            target = random.choice(free)
+            self.swap((row, col), target)            
+            row, col = target
+
+    def find(self, value):
+        """returns the row, col coordinates of the specified value
+           in the graph"""
+        if value < 0 or value > 8:
+            raise Exception("value out of range")
+
+        for row in range(3):
+            for col in range(3):
+                if self.adj_matrix[row][col] == value:
+                    return row, col
+
+    def peek(self, row, col):
+        """returns the value at the specified row and column"""
+        return self.adj_matrix[row][col]
+
+    def poke(self, row, col, value):
+        """sets the value at the specified row and column"""
+        self.adj_matrix[row][col] = value
+
+    def swap(self, pos_a, pos_b):
+        """swaps values at the specified coordinates"""
+        temp = self.peek(*pos_a)
+        self.poke(pos_a[0], pos_a[1], self.peek(*pos_b))
+        self.poke(pos_b[0], pos_b[1], temp)
+        
 
 def heur(puzzle, item_total_calc, total_calc):
     """
@@ -182,18 +217,18 @@ def main():
     p.shuffle(20)
     print p
 
-    path, count = p.solve(h_manhattan, A*)
+    path, count = p.solve(h_manhattan, 'Astar')
     path.reverse()
     for i in path: 
         print i
 
-    print "Solved with A* search utilizing Manhattan distance hueuristic exploring ", count, "states"
-	path, count = p.solve(h_default, UCS)
-	print "Solved with UCS in", count, "moves"
-	path, count = p.solve(h_default, DFS)
-	print "Solved with DFS in", count, "moves"
-    path, count = p.solve(h_default, BFS)
+    print "Solved with A* search utilizing Manhattan distance hueuristic exploring", count, "states"
+    path, count = p.solve(h_default, 'UCS')
+    print "Solved with UCS in", count, "moves"
+    path, count = p.solve(h_default, 'DFS')
+    print "Solved with DFS in", count, "moves"
+    path, count = p.solve(h_default, 'BFS')
     print "Solved with BFS in", count, "moves"
 
 if __name__ == "__main__":
-main()
+    main()
