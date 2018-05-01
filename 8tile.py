@@ -18,7 +18,7 @@ class EightPuzzle:
 
     def __init__(self):
         # heuristic value
-        self._hval = 0
+        self._heurval = 0
         # search depth of current instance
         self._depth = 0
         # parent node in search path
@@ -92,46 +92,46 @@ class EightPuzzle:
         def is_solved(puzzle):
             return puzzle.adj_matrix == _goal_state
 
-        openl = [self]
-        closedl = []
+        openlist = [self] # represents the calling matrix's initial configuation
+        closedlist = [] # represents the moves that the calling matrix will make to solve itself
         move_count = 0
-        while len(openl) > 0:
-            x = openl.pop(0)
+        while len(openlist) > 0:
+            x = openlist.pop(0)
             move_count += 1
             if (is_solved(x)):
-                if len(closedl) > 0:
+                if len(closedlist) > 0:
                     return x._generate_solution_path([]), move_count
                 else:
                     return [x]
 
-            succ = x._generate_moves()
-            idx_open = idx_closed = -1
-            for move in succ:
+            successor = x._generate_moves()
+            index_open = index_closed = -1  
+            for move in successor:
                 # have we already seen this node?
-                idx_open = index(move, openl)
-                idx_closed = index(move, closedl)
-                hval = h(move)
-                fval = hval + move._depth
+                index_open = index(move, openlist) 
+                index_closed = index(move, closedlist)
+                heurval = h(move)
+                fval = heurval + move._depth
 
-                if idx_closed == -1 and idx_open == -1:
-                    move._hval = hval
-                    openl.append(move)
-                elif idx_open > -1:
-                    copy = openl[idx_open]
-                    if fval < copy._hval + copy._depth:
+                if index_closed == -1 and index_open == -1:
+                    move._heurval = heurval
+                    openlist.append(move)
+                elif index_open > -1:
+                    copy = openlist[index_open]
+                    if fval < copy._heurval + copy._depth:
                         # copy move's values over existing
-                        copy._hval = hval
+                        copy._heurval = heurval
                         copy._parent = move._parent
                         copy._depth = move._depth
-                elif idx_closed > -1:
-                    copy = closedl[idx_closed]
-                    if fval < copy._hval + copy._depth:
-                        move._hval = hval
-                        closedl.remove(copy)
-                        openl.append(move)
+                elif index_closed > -1:
+                    copy = closedlist[index_closed]
+                    if fval < copy._heurval + copy._depth:
+                        move._heurval = heurval
+                        closedlist.remove(copy)
+                        openlist.append(move)
 
-            closedl.append(x)
-            openl = sorted(openl, key=lambda p: p._hval + p._depth)
+            closedlist.append(x)
+            openlist = sorted(openlist, key=lambda p: p._heurval + p._depth)
 
         # if finished state not found, return failure
         return [], 0
@@ -151,7 +151,7 @@ def heur(puzzle, item_total_calc, total_calc):
     t = 0
     for row in range(3):
         for col in range(3):
-            val = puzzle.peek(row, col) - 1
+            val = puzzle.peek(row, col) - 1 # value is -1 if the peeked index is 0. triggers if target_row < 0 below.
             target_col = val % 3
             target_row = val / 3
 
