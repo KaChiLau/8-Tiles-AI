@@ -124,7 +124,7 @@ class EightPuzzle:
             # if algorithm == UCS:
             #     openlist = sorted(openlist, key=lambda p: p.depth)
             # else:
-            openlist = sorted(openlist, key=lambda p: p._heurval + p._depth)
+            openlist = sorted(openlist, key=lambda p: p._heurval + p._depth) # COMENT THIS LINE TO USE DFS ALGORITHM
 
         # if finished state not found, return failure
         return [], 0
@@ -154,8 +154,8 @@ def heur(puzzle, item_total_calc, total_calc):
             # account for 0 as blank
             if target_row < 0:
                 target_row = 2
-
             t += item_total_calc(row, target_row, col, target_col)
+
 
     return total_calc(t)
 
