@@ -84,12 +84,7 @@ class EightPuzzle:
         fringe = [self]  # list that contains all nodes to be expanded/examined
         path = []  # list that contains the final path taken through the tree to the goal state
 
-        if algorithm == 'UCS' or algorithm == 'BFS':
-            fringe = sorted(fringe, key=lambda p: p._depth)
-        elif algorithm == 'A*':
-            fringe = sorted(fringe, key=lambda p: p._heurval + p._depth) 
-        # DFS happens automatically if the fringe is never sorted- the solve() function always expands the leftmost
-        # node in the fringe. 
+        
         def is_solved(puzzle):
                 return puzzle.adj_matrix == _goal_state
 
@@ -101,7 +96,7 @@ class EightPuzzle:
                         if len(path) > 0:
                                 return x._generate_solution_path([]), move_count
                         else:
-                                return [x]
+                                return [x], move_count
 
                 successor = x._generate_moves()
                 fringe_index = path_index = -1
@@ -128,13 +123,13 @@ class EightPuzzle:
                                 copy._heurval = heurval
                                 copy._parent = move._parent
                                 copy._depth = move._depth
-                    elif path_index > -1:
-                            copy = path[path_index]
-                            if total_utility < copy._heurval + copy._depth:
-                                    move._heurval = heurval
-                                    path.remove(copy)
-                                    fringe.append(move)
-
+                   
+                if algorithm == 'UCS' or algorithm == 'BFS':
+                    fringe = sorted(fringe, key=lambda p: p._depth)
+                elif algorithm == 'A*':
+                    fringe = sorted(fringe, key=lambda p: p._heurval + p._depth) 
+                # DFS happens automatically if the fringe is never sorted- the solve() function always expands the leftmost
+                # node in the fringe. 
                 path.append(x)
                         
     # If the goal state is never reached, return an empty list (representing the path taken is null) 
