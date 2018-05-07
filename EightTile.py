@@ -1,15 +1,10 @@
 # Solves a randomized 8-puzzle using
 
 import util
-import pdb
 
 _goal_state = [[1, 2, 3],
                [4, 5, 6],
                [7, 8, 0]]
-
-_test_state = [[0, 2, 3],
-               [1, 5, 6],
-               [4, 7, 8]]
 
 def index(item, seq):
     """Helper function that returns -1 for non-found index value of a seq"""
@@ -17,7 +12,6 @@ def index(item, seq):
         return seq.index(item)
     else:
         return -1
-
 
 class EightPuzzle:
 
@@ -31,7 +25,7 @@ class EightPuzzle:
         self._parent = None
         self.adj_matrix = []
         for i in range(3):
-            self.adj_matrix.append(_test_state[i][:])
+            self.adj_matrix.append(_goal_state[i][:])
 
     def getter(self):
         return self.adj_matrix
@@ -77,40 +71,97 @@ class EightPuzzle:
             return self._parent._generate_solution_path(path)
 
     def solve(self, heur, algorithm):
-	
+		"""Performs BFS, UCS, or A* search for goal state.
+        heur(puzzle) - heuristic function, returns an integer
+		"""
+
 		def is_solved(puzzle):
 			return puzzle.adj_matrix == _goal_state
-
-		if algorithm == 'DFS':
-			fringe = util.Stack()
-		if algorithm == 'BFS':
-			fringe = util.Queue()
-		if algorithm == 'UCS':
-			fringe = util.PriorityQueueWithFunction(lambda p: p._depth)
-		if algorithm == 'A*':
-			fringe = util.PriorityQueueWithFunction(lambda p: p._depth + p._heurval)
-        
-		path = list()
-		visited = list()
-		move_count = 0
-		fringe.push(self)
 		
-		while not fringe.isEmpty():
-			node = fringe.pop()
+		fringe = [self]  # list that contains all nodes to be expanded/examined
+		path = []  # list that contains the final path taken through the tree to the goal state
+		move_count = 0
+		while len(fringe) > 0:
+			x = fringe.pop(0)
 			move_count += 1
-			
-			if(node not in visited):
-				visited.append(node)
-  
-				if (is_solved(node)):
-					return node._generate_solution_path([]), move_count
-                    
-				successor = node._generate_moves()
-				for move in successor:
-					move.parent = node
-					fringe.push(move)
+			if (is_solved(x)):
+				if len(path) > 0:
+					return x._generate_solution_path([]), move_count
+				else:
+					return [x]
 
-	return [], 0
+			successor = x._generate_moves()
+			fringe_index = path_index = -1
+			for move in successor:
+                # check for if the node has already been seen
+				fringe_index = index(move, fringe)
+				path_index = index(move, path)
+				heurval = heur(move)
+				# total utility is defined as heuristic value of the matrix after move as well as its depth in the tree- 
+				# the lower the depth, the more costly it is to expand that node, and the costlier it is. For all intents
+				# and purposes, the depth of the node in the tree is taken as the 'cost' of that node.
+				total_utility = heurval + move._depth 
+
+				if path_index == -1 and fringe_index == -1:
+					move._heurval = heurval
+					fringe.append(move)
+				elif fringe_index > -1:
+					copy = fringe[fringe_index]
+					if total_utility < copy._heurval + copy._depth:
+                        # copy the successor's values over the existing node
+						copy._heurval = heurval
+						copy._parent = move._parent
+						copy._depth = move._depth
+				elif path_index > -1:
+					copy = path[path_index]
+					if total_utility < copy._heurval + copy._depth:
+						move._heurval = heurval
+						path.remove(copy)
+						fringe.append(move)
+
+			path.append(x)
+			if algorithm == 'BFS' or algorithm == 'UCS':
+				fringe = sorted(fringe, key=lambda p: p._depth)
+			elif algorithm == 'A*':
+				fringe = sorted(fringe, key=lambda p: p._heurval + p._depth) 
+				
+        # If the goal state is never reached, return an empty list (representing the path taken is null) 
+		# and 0 for the number of steps.
+		return [], 0
+
+    def solve_DFS(self):
+        """Performs DFS search for goal state.
+        heur(puzzle) - heuristic function, returns an integer
+		"""
+
+        def is_solved(puzzle):
+            return puzzle.adj_matrix == _goal_state
+
+        #fringe = [self]  # list that contains all nodes to be expanded/examined
+        #path = []  # list that contains the final path taken through the tree to the goal state
+
+        fringe = util.Stack()
+        path = list()
+        visited = list()
+        move_count = 0
+        
+        fringe.push(self)
+        while not fringe.isEmpty():
+            node = fringe.pop()
+            move_count += 1
+
+            if(node not in visited):
+                visited.append(node)
+            
+                if (is_solved(node)):
+                    return node._generate_solution_path([]), move_count
+                    
+                successor = node._generate_moves()
+                for move in successor:
+                    move.parent = node
+                    fringe.push(move)
+             
+        return [], 0
 
 def heur(puzzle, item_total_calc, total_calc):
     """
@@ -122,7 +173,7 @@ def heur(puzzle, item_total_calc, total_calc):
     item_total_calc - takes 4 parameters: current row, target row, current col, target col. 
     Returns int.
     total_calc - takes 1 parameter, the sum of item_total_calc over all entries, and returns int. 
-    total_calc is the value of the heuristic function.
+    This is the value of the heuristic function
     """
     t = 0
     utilit = util.utility()
@@ -164,7 +215,7 @@ def main():
 	
 	selection = raw_input("Which algorithm would you like to use to solve this matrix? (DFS, BFS, UCS, A*, or All for all four) \n")
 	if selection == "DFS":
-		path, count = shuffle.solve(h_default, 'DFS')
+		path, count = shuffle.solve_DFS()
 		path.reverse()
 		print "Path to goal state:"
 		for i in path:
@@ -202,8 +253,9 @@ def main():
 		print "Solved with UCS search in", count, "node expansions"
 		path, count = shuffle.solve(h_default, 'BFS')
 		print "Solved with BFS search in", count, "node expansions"
-		path, count = shuffle.solve(h_default, 'DFS')
+		path, count = shuffle.solve_DFS()
 		print "Solved with DFS search in", count, "node expansions"
+	
 
 if __name__ == "__main__":
     main()
