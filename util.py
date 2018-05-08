@@ -2,7 +2,7 @@ import math
 import random
 import EightTile
 
-class Stack:
+class Stack: # lifted directly from pacman util.py
     "A container with a last-in-first-out (LIFO) queuing policy."
     def __init__(self):
         self.list = []
@@ -25,27 +25,24 @@ class Stack:
 class utility:
 
     def shuffle(self, Puzzle, step_count):
-        # print Puzzle
+		
         for i in range(step_count):
             row, col = self.find(Puzzle, 0)
-            # print("ROW COLONE",row,col)
             free = self._get_legal_moves(Puzzle)
-            # print ("FREEEE",free)
-            target = random.choice(free)
-            # print("TARGT",target)
+            target = random.choice(free) 
             self.swap(Puzzle, (row, col), target)
             row, col = target
-        return Puzzle
+		
+	return Puzzle
 
     def something(self, a, b):
         return a + b
 
     def _get_legal_moves(self, Puzzle):
-        """Returns list of tuples with which the free space may
-        be swapped"""
+        # returns list of tuples with which the free space may be swapped
         # get row and column of the empty piece
         row, col = self.find(Puzzle, 0)
-        free = []
+        free = [] 
 
         # find which pieces can move there
         if row > 0:
@@ -60,37 +57,28 @@ class utility:
         return free
 
     def find(self, Puzzle, value):
-        """returns the row, col coordinates of the specified value
-           in the graph"""
+		# returns the row, col of specified value in the puzzle.
         if value < 0 or value > 8:
             raise Exception("value out of range")
 
         for row in range(3):
             for col in range(3):
                 if Puzzle.adj_matrix[row][col] == value:
-                    # print("ROW COL", row, col)
                     return row, col
 
     def peek(self,Puzzle, row, col):
-
-        """returns the value at the specified row and column"""
-        # print("Peek Value:", Puzzle.adj_matrix[row][col])
+        # returns the value at the specified row and column
         return Puzzle.adj_matrix[row][col]
 
-    def poke(self, Puzzle, row, col, value):
-
-        """sets the value at the specified row and column"""
+    def set(self, Puzzle, row, col, value):
+		# sets the value at the specified row and column
         Puzzle.adj_matrix[row][col] = value
-        # print("Poke Value:", Puzzle.adj_matrix[row][col])
-
-    def swap(self, Puzzle, pos_a, pos_b):
-
-        """swaps values at the specified coordinates"""
+		
+    def swap(self, Puzzle, pos_a, pos_b): 
+		# swaps values at the specified coordinates (used when creating puzzles for after a move has been performed)
+		# pos_a and pos_b are tuples that follow the order (row, col)
 
         temp = self.peek(Puzzle, *pos_a)
-        # print("TEMP", temp)
-        # print("POS A", pos_a[0])
-        self.poke(Puzzle, pos_a[0], pos_a[1], self.peek(Puzzle, *pos_b))
-        # print("SELF PEEEK",self.peek(Puzzle, *pos_b))
-        self.poke(Puzzle, pos_b[0], pos_b[1], temp)
+        self.set(Puzzle, pos_a[0], pos_a[1], self.peek(Puzzle, *pos_b))
+        self.set(Puzzle, pos_b[0], pos_b[1], temp)
         return Puzzle
