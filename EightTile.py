@@ -1,13 +1,17 @@
-# Solves a randomized 8-puzzle using
+# solves a randomized 8 tile puzzle using several common search algorithms
 
 import util
 
 _goal_state = [[1, 2, 3],
                [4, 5, 6],
                [7, 8, 0]]
+			   
+_init_state = [[1, 2, 3],
+			   [7, 4, 6],
+			   [0, 5, 8]]
 
 def index(item, seq):
-    """Helper function that returns -1 for non-found index value of a seq"""
+    # helper function that returns -1 for non-found index value of a seq
     if item in seq:
         return seq.index(item)
     else:
@@ -25,7 +29,7 @@ class EightPuzzle:
         self._parent = None
         self.adj_matrix = []
         for i in range(3):
-            self.adj_matrix.append(_goal_state[i][:])
+            self.adj_matrix.append(_init_state[i][:])
 
     def getter(self):
         return self.adj_matrix
@@ -71,9 +75,8 @@ class EightPuzzle:
             return self._parent._generate_solution_path(path)
 
     def solve(self, heur, algorithm):
-		"""Performs BFS, UCS, or A* search for goal state.
-        heur(puzzle) - heuristic function, returns an integer
-		"""
+		# performs BFS, UCS, or A* search for goal state.
+        # heur(puzzle) - heuristic function, returns an integer
 
 		def is_solved(puzzle):
 			return puzzle.adj_matrix == _goal_state
@@ -125,14 +128,14 @@ class EightPuzzle:
 			elif algorithm == 'A*':
 				fringe = sorted(fringe, key=lambda p: p._heurval + p._depth) 
 				
-        # If the goal state is never reached, return an empty list (representing the path taken is null) 
+        # if the goal state is never reached, return an empty list (representing the path taken is null) 
 		# and 0 for the number of steps.
 		return [], 0
-
+	
     def solve_DFS(self):
-        """Performs DFS search for goal state.
-        heur(puzzle) - heuristic function, returns an integer
-		"""
+        # Performs DFS search for goal state.
+        # heur(puzzle) - heuristic function, returns an integer
+		
 
         def is_solved(puzzle):
             return puzzle.adj_matrix == _goal_state
@@ -162,18 +165,17 @@ class EightPuzzle:
                     fringe.push(move)
              
         return [], 0
+	
 
 def heur(puzzle, item_total_calc, total_calc):
     """
-    Heuristic template that provides the current and target position for each number and the 
+    heuristic template that provides the current and target position for each number and the 
     total function.
     
-    Parameters:
+    parameters:
     puzzle - the puzzle
-    item_total_calc - takes 4 parameters: current row, target row, current col, target col. 
-    Returns int.
+    item_total_calc - takes 4 parameters: current row, target row, current col, target col. returns int.
     total_calc - takes 1 parameter, the sum of item_total_calc over all entries, and returns int. 
-    This is the value of the heuristic function
     """
     t = 0
     utilit = util.utility()
@@ -192,9 +194,8 @@ def heur(puzzle, item_total_calc, total_calc):
 
     return total_calc(t)
 
-
-# some heuristic functions, the best being the standard manhattan distance in this case, as it comes
-# closest to maximizing the estimated distance while still being admissible.
+# both h_manhattan and h_default are to be used with the heur() function above
+# the lambda arguments in the return statement below specify how to use total_calc and item_total_calc above.
 
 def h_manhattan(puzzle):
     return heur(puzzle,
@@ -212,6 +213,7 @@ def main():
 	shuffle = utility.shuffle(p, 20)
 	print "Starting puzzle:"
 	print shuffle
+	#print p
 	
 	selection = raw_input("Which algorithm would you like to use to solve this matrix? (DFS, BFS, UCS, A*, or All for all four) \n")
 	if selection == "DFS":
