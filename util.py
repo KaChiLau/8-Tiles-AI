@@ -1,6 +1,5 @@
 import math
 import random
-import EightTile
 
 class Stack: # lifted directly from pacman util.py
     "A container with a last-in-first-out (LIFO) queuing policy."
@@ -25,14 +24,14 @@ class Stack: # lifted directly from pacman util.py
 class utility:
 
     def shuffle(self, Puzzle, step_count):
-		
+
         for i in range(step_count):
             row, col = self.find(Puzzle, 0)
             free = self._get_legal_moves(Puzzle)
-            target = random.choice(free) 
+            target = random.choice(free)
             self.swap(Puzzle, (row, col), target)
             row, col = target
-		
+
 	return Puzzle
 
     def something(self, a, b):
@@ -42,7 +41,7 @@ class utility:
         # returns list of tuples with which the free space may be swapped
         # get row and column of the empty piece
         row, col = self.find(Puzzle, 0)
-        free = [] 
+        free = []
 
         # find which pieces can move there
         if row > 0:
@@ -73,8 +72,8 @@ class utility:
     def set(self, Puzzle, row, col, value):
 		# sets the value at the specified row and column
         Puzzle.adj_matrix[row][col] = value
-		
-    def swap(self, Puzzle, pos_a, pos_b): 
+
+    def swap(self, Puzzle, pos_a, pos_b):
 		# swaps values at the specified coordinates (used when creating puzzles for after a move has been performed)
 		# pos_a and pos_b are tuples that follow the order (row, col)
 
