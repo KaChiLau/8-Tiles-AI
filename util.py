@@ -25,7 +25,7 @@ class Stack: # lifted directly from pacman util.py
 class utility:
 
     def shuffle(self, Puzzle, step_count):
-		
+		# comment out the for loop below and indent return Puzzle if using _init_state in EightTile.py
         for i in range(step_count):
             row, col = self.find(Puzzle, 0)
             free = self._get_legal_moves(Puzzle)

@@ -1,14 +1,16 @@
 # solves a randomized 8 tile puzzle using several common search algorithms
 
 import util
+import sys
+sys.setrecursionlimit(5000);
 
 _goal_state = [[1, 2, 3],
                [4, 5, 6],
                [7, 8, 0]]
 			   
-_init_state = [[1, 2, 3],
-			   [7, 4, 6],
-			   [0, 5, 8]]
+_init_state = [[2, 5, 3], # this puzzle fails DFS even with 5000 recursion calls allowed!!!
+			   [1, 0, 6],
+			   [4, 7, 8]]
 
 def index(item, seq):
     # helper function that returns -1 for non-found index value of a seq
@@ -29,7 +31,7 @@ class EightPuzzle:
         self._parent = None
         self.adj_matrix = []
         for i in range(3):
-            self.adj_matrix.append(_init_state[i][:])
+            self.adj_matrix.append(_goal_state[i][:]) # for debugging, take _goal_state and make it _init_state
 
     def getter(self):
         return self.adj_matrix
@@ -133,18 +135,12 @@ class EightPuzzle:
 		return [], 0
 	
     def solve_DFS(self):
-        # Performs DFS search for goal state.
-        # heur(puzzle) - heuristic function, returns an integer
-		
+        # performs DFS search for goal state.		
 
         def is_solved(puzzle):
             return puzzle.adj_matrix == _goal_state
 
-        #fringe = [self]  # list that contains all nodes to be expanded/examined
-        #path = []  # list that contains the final path taken through the tree to the goal state
-
         fringe = util.Stack()
-        path = list()
         visited = list()
         move_count = 0
         
@@ -167,15 +163,15 @@ class EightPuzzle:
         return [], 0
 	
 
-def heur(puzzle, item_total_calc, total_calc):
+def heur(puzzle, item_total_util, total_util):
     """
     heuristic template that provides the current and target position for each number and the 
     total function.
     
     parameters:
     puzzle - the puzzle
-    item_total_calc - takes 4 parameters: current row, target row, current col, target col. returns int.
-    total_calc - takes 1 parameter, the sum of item_total_calc over all entries, and returns int. 
+    item_total_util - takes 4 parameters: current row, target row, current col, target col. returns int.
+    total_util - takes 1 parameter, the sum of item_total_util over all entries, and returns int. 
     """
     t = 0
     utilit = util.utility()
@@ -189,10 +185,10 @@ def heur(puzzle, item_total_calc, total_calc):
             # account for 0 as blank
             if target_row < 0:
                 target_row = 2
-            t += item_total_calc(row, target_row, col, target_col)
+            t += item_total_util(row, target_row, col, target_col)
 
 
-    return total_calc(t)
+    return total_util(t)
 
 # both h_manhattan and h_default are to be used with the heur() function above
 # the lambda arguments in the return statement below specify how to use total_calc and item_total_calc above.
@@ -211,9 +207,8 @@ def main():
 	utility = util.utility()
 	p = EightPuzzle()
 	shuffle = utility.shuffle(p, 20)
-	print "Starting puzzle:"
+	print "Starting puzzle:" 
 	print shuffle
-	#print p
 	
 	selection = raw_input("Which algorithm would you like to use to solve this matrix? (DFS, BFS, UCS, A*, or All for all four) \n")
 	if selection == "DFS":
@@ -258,6 +253,5 @@ def main():
 		path, count = shuffle.solve_DFS()
 		print "Solved with DFS search in", count, "node expansions"
 	
-
 if __name__ == "__main__":
     main()
